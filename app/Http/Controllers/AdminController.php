@@ -10,6 +10,9 @@ use App\Models\Warehouse;
 use App\Models\Country;
 use App\Models\Region;
 use App\Models\Booking;
+use App\Models\Quote;
+use App\Models\ShippingService;
+use App\Models\ServiceType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -26,15 +29,17 @@ class AdminController extends Controller
 
     public function rates()
     {
-        $rates = Rate::with(['origin', 'country', 'region', 'tiers'])
+        $rates = Rate::with(['origin', 'country', 'region', 'tiers', 'shippingService', 'serviceType'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
             
         $warehouses = Warehouse::all();
         $countries = Country::all();
         $regions = Region::all();
+        $shippingServices = ShippingService::all();
+        $serviceTypes = ServiceType::all();
 
-        return view('admin.rates', compact('rates', 'warehouses', 'countries', 'regions'));
+        return view('admin.rates', compact('rates', 'warehouses', 'countries', 'regions', 'shippingServices', 'serviceTypes'));
     }
 
     public function storeRate(Request $request)
@@ -42,8 +47,8 @@ class AdminController extends Controller
         $request->validate([
             'origin_id' => 'required|exists:warehouses,id',
             'country_id' => 'required|exists:countries,id',
-            'service' => 'required|string',
-            'service_type' => 'required|string',
+            'shipping_service_id' => 'required|exists:shipping_services,id',
+            'service_type_id' => 'required|exists:service_types,id',
             'tiers' => 'required|array',
             'tiers.*.min_volume' => 'required|numeric',
             'tiers.*.price_per_cft' => 'required|numeric',
@@ -53,8 +58,11 @@ class AdminController extends Controller
             'origin_id' => $request->origin_id,
             'country_id' => $request->country_id,
             'region_id' => $request->region_id,
-            'service' => $request->service,
-            'service_type' => $request->service_type,
+            'shipping_service_id' => $request->shipping_service_id,
+            'service_type_id' => $request->service_type_id,
+            // Keep legacy strings for backward compatibility during transition if needed
+            'service' => ShippingService::find($request->shipping_service_id)->name,
+            'service_type' => ServiceType::find($request->service_type_id)->name,
         ]);
 
         foreach ($request->tiers as $tier) {
@@ -73,8 +81,8 @@ class AdminController extends Controller
         $request->validate([
             'origin_id' => 'required|exists:warehouses,id',
             'country_id' => 'required|exists:countries,id',
-            'service' => 'required|string',
-            'service_type' => 'required|string',
+            'shipping_service_id' => 'required|exists:shipping_services,id',
+            'service_type_id' => 'required|exists:service_types,id',
             'tiers' => 'required|array',
             'tiers.*.min_volume' => 'required|numeric',
             'tiers.*.price_per_cft' => 'required|numeric',
@@ -84,8 +92,10 @@ class AdminController extends Controller
             'origin_id' => $request->origin_id,
             'country_id' => $request->country_id,
             'region_id' => $request->region_id,
-            'service' => $request->service,
-            'service_type' => $request->service_type,
+            'shipping_service_id' => $request->shipping_service_id,
+            'service_type_id' => $request->service_type_id,
+            'service' => ShippingService::find($request->shipping_service_id)->name,
+            'service_type' => ServiceType::find($request->service_type_id)->name,
         ]);
 
         // Recreate tiers to ensure clean state
@@ -262,5 +272,115 @@ class AdminController extends Controller
         $user->update(['status' => 'rejected']);
 
         return back()->with('success', "User {$user->name} has been rejected.");
+    }
+
+    // Shipping Services
+    public function services()
+    {
+        $services = ShippingService::withCount('rates')->paginate(10);
+        return view('admin.services', compact('services'));
+    }
+
+    public function storeService(Request $request)
+    {
+        $request->validate(['name' => 'required|string|unique:shipping_services,name', 'description' => 'nullable|string']);
+        ShippingService::create($request->only('name', 'description'));
+        return back()->with('success', 'Service category created.');
+    }
+
+    public function updateService(Request $request, ShippingService $service)
+    {
+        $request->validate(['name' => 'required|string|unique:shipping_services,name,' . $service->id, 'description' => 'nullable|string']);
+        $service->update($request->only('name', 'description'));
+        return back()->with('success', 'Service category updated.');
+    }
+
+    public function destroyService(ShippingService $service)
+    {
+        if ($service->rates()->exists()) {
+            return back()->with('error', 'Cannot delete service that is linked to active rates.');
+        }
+        $service->delete();
+        return back()->with('success', 'Service category deleted.');
+    }
+
+    // Service Types
+    public function serviceTypes()
+    {
+        $serviceTypes = ServiceType::withCount(['rates', 'quotes'])->paginate(10);
+        return view('admin.service-types', compact('serviceTypes'));
+    }
+
+    public function storeServiceType(Request $request)
+    {
+        $request->validate(['name' => 'required|string|unique:service_types,name', 'description' => 'nullable|string']);
+        ServiceType::create($request->only('name', 'description'));
+        return back()->with('success', 'Service type created.');
+    }
+
+    public function updateServiceType(Request $request, ServiceType $serviceType)
+    {
+        $request->validate(['name' => 'required|string|unique:service_types,name,' . $serviceType->id, 'description' => 'nullable|string']);
+        $serviceType->update($request->only('name', 'description'));
+        return back()->with('success', 'Service type updated.');
+    }
+
+    public function destroyServiceType(ServiceType $serviceType)
+    {
+        if ($serviceType->rates()->exists() || $serviceType->quotes()->exists()) {
+            return back()->with('error', 'Cannot delete service type that is linked to active rates or quotes.');
+        }
+        $serviceType->delete();
+        return back()->with('success', 'Service type deleted.');
+    }
+
+    public function dashboard()
+    {
+        $user = auth()->user();
+
+        if ($user->role === 'admin') {
+            $stats = [
+                // User Stats
+                'total_clients' => User::where('role', 'client')->count(),
+                'pending_approvals' => User::where('status', 'pending')->count(),
+                
+                // Inventory/Settings
+                'total_warehouses' => Warehouse::count(),
+                'total_countries' => Country::count(),
+                'total_regions' => Region::count(),
+                'total_services' => ShippingService::count(),
+                'total_service_types' => ServiceType::count(),
+                'total_rates' => Rate::count(),
+                
+                // Operational
+                'active_departures' => Departure::where('departure_date', '>', now())->count(),
+                'total_voyages' => Departure::count(),
+                
+                'total_quotes' => $totalQuotes = Quote::count(),
+                'total_bookings' => $totalBookings = Booking::count(),
+                'success_rate' => $totalQuotes > 0 ? number_format(($totalBookings / $totalQuotes) * 100, 1) : 0,
+                'estimated_revenue' => Booking::join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.total_price'),
+                'total_volume_cft' => Booking::join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.volume_cft'),
+                
+                // Recent Activity
+                'recent_quotes' => Quote::with(['user', 'country'])->latest()->take(5)->get(),
+                'recent_bookings' => Booking::with(['user', 'quote.country'])->latest()->take(5)->get(),
+                'upcoming_departures' => Departure::where('departure_date', '>', now())->orderBy('departure_date', 'asc')->take(3)->get(),
+            ];
+            
+            return view('dashboard', compact('stats'));
+        } else {
+            // Client Stats
+            $stats = [
+                'my_quotes_count' => Quote::where('user_id', $user->id)->count(),
+                'my_bookings_count' => Booking::where('user_id', $user->id)->count(),
+                'my_total_spending' => Booking::where('user_id', $user->id)->join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.total_price'),
+                'my_volume_cft' => Booking::where('user_id', $user->id)->join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.volume_cft'),
+                'recent_my_quotes' => Quote::where('user_id', $user->id)->latest()->take(5)->get(),
+                'recent_my_bookings' => Booking::where('user_id', $user->id)->with('quote.country')->latest()->take(5)->get(),
+            ];
+
+            return view('dashboard', compact('stats'));
+        }
     }
 }

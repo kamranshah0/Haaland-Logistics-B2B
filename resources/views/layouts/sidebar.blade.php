@@ -6,12 +6,8 @@
         
         <!-- Sidebar Branding -->
         <div class="h-24 flex items-center px-8 border-b border-white/5 bg-slate-950">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 no-underline">
-                <div class="w-12 h-12 bg-accent-500 rounded flex items-center justify-center font-outfit text-2xl font-bold text-white shadow-xl shadow-accent-500/20">HL</div>
-                <div class="flex flex-col">
-                    <span class="text-white font-outfit font-bold tracking-tight text-xl leading-tight uppercase">Haaland</span>
-                    <span class="text-slate-400 text-[10px] font-bold tracking-[0.2em] uppercase">Logistics</span>
-                </div>
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 no-underline uppercase tracking-tight">
+                <img src="{{ asset('assets/logo.png') }}" alt="Haaland Logistics" class="h-10 w-auto object-contain">
             </a>
         </div>
 
@@ -34,6 +30,12 @@
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.rates')" :active="request()->routeIs('admin.rates')" icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z">
                     {{ __('Rates') }}
+                </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.services')" :active="request()->routeIs('admin.services')" icon="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4">
+                    {{ __('Services') }}
+                </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.service-types')" :active="request()->routeIs('admin.service-types')" icon="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                    {{ __('Types') }}
                 </x-sidebar-link>
                 
                 <div class="pt-6 pb-2 px-4">

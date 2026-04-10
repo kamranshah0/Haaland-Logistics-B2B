@@ -76,7 +76,17 @@
                                 <td class="px-8 py-5 text-right">
                                     <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button 
-                                            @click="editingVessel = {{ $dep->toJson() }}; $dispatch('open-modal', 'edit-vessel-modal')"
+                                            @click='
+                                                (() => {
+                                                    let data = {!! $dep->toJson() !!};
+                                                    // Normalize dates for HTML date input (YYYY-MM-DD)
+                                                    if (data.cutoff_date) data.cutoff_date = data.cutoff_date.split("T")[0];
+                                                    if (data.departure_date) data.departure_date = data.departure_date.split("T")[0];
+                                                    if (data.arrival_date) data.arrival_date = data.arrival_date.split("T")[0];
+                                                    editingVessel = data;
+                                                })();
+                                                $dispatch("open-modal", "edit-vessel-modal")
+                                            '
                                             class="bg-brand-700 text-white p-2 rounded text-[10px] font-bold transition-all uppercase tracking-widest shadow-lg shadow-brand-700/20">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>

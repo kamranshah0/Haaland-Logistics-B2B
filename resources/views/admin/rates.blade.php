@@ -62,10 +62,10 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold uppercase tracking-tighter">{{ $rate->service }}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold uppercase tracking-tighter">{{ $rate->shippingService->name ?? $rate->service }}</span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-700/5 text-brand-700 font-bold uppercase tracking-tighter border border-brand-700/10">{{ $rate->service_type }}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-700/5 text-brand-700 font-bold uppercase tracking-tighter border border-brand-700/10">{{ $rate->serviceType->name ?? $rate->service_type }}</span>
                                 </td>
                                 @foreach([110, 170, 200, 350] as $t)
                                     <td class="px-4 py-4 text-center">
@@ -162,19 +162,21 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <x-input-label for="service" value="Service (Freight Category)" />
-                            <select name="service" class="input-premium w-full mt-1" required>
-                                <option value="Standard Consolidation">Standard Consolidation</option>
-                                <option value="Express Shipping">Express Shipping</option>
-                                <option value="Economy Freight">Economy Freight</option>
+                            <x-input-label for="shipping_service_id" value="Service (Freight Category)" />
+                            <select name="shipping_service_id" class="input-premium w-full mt-1" required>
+                                <option value="">Select Service</option>
+                                @foreach($shippingServices as $s)
+                                    <option value="{{ $s->id }}">{{ $s->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div>
-                            <x-input-label for="service_type" value="Service Type (Scope)" />
-                            <select name="service_type" class="input-premium w-full mt-1" required>
-                                <option value="Warehouse to Door">Warehouse to Door</option>
-                                <option value="Warehouse to Port">Warehouse to Port</option>
-                                <option value="Warehouse to Warehouse">Warehouse to Warehouse</option>
+                            <x-input-label for="service_type_id" value="Service Type (Scope)" />
+                            <select name="service_type_id" class="input-premium w-full mt-1" required>
+                                <option value="">Select Scope</option>
+                                @foreach($serviceTypes as $t)
+                                    <option value="{{ $t->id }}">{{ $t->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -243,19 +245,19 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <x-input-label for="edit_service" value="Service (Freight Category)" />
-                        <select name="service" id="edit_service" class="input-premium w-full mt-1" required x-model="editingRate.service">
-                            <option value="Standard Consolidation">Standard Consolidation</option>
-                            <option value="Express Shipping">Express Shipping</option>
-                            <option value="Economy Freight">Economy Freight</option>
+                        <x-input-label for="edit_shipping_service_id" value="Service (Freight Category)" />
+                        <select name="shipping_service_id" id="edit_shipping_service_id" class="input-premium w-full mt-1" required x-model="editingRate.shipping_service_id">
+                            @foreach($shippingServices as $s)
+                                <option value="{{ $s->id }}">{{ $s->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>
-                        <x-input-label for="edit_service_type" value="Service Type (Scope)" />
-                        <select name="service_type" id="edit_service_type" class="input-premium w-full mt-1" required x-model="editingRate.service_type">
-                            <option value="Warehouse to Door">Warehouse to Door</option>
-                            <option value="Warehouse to Port">Warehouse to Port</option>
-                            <option value="Warehouse to Warehouse">Warehouse to Warehouse</option>
+                        <x-input-label for="edit_service_type_id" value="Service Type (Scope)" />
+                        <select name="service_type_id" id="edit_service_type_id" class="input-premium w-full mt-1" required x-model="editingRate.service_type_id">
+                            @foreach($serviceTypes as $t)
+                                <option value="{{ $t->id }}">{{ $t->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>

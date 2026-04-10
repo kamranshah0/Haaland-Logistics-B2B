@@ -8,8 +8,13 @@ class Quote extends Model
 {
     protected $fillable = [
         'user_id', 'reference_number', 'origin_id', 'country_id', 'region_id',
-        'volume_cbm', 'volume_cft', 'total_price', 'service_type', 'status'
+        'volume_cbm', 'volume_cft', 'total_price', 'service_type_id', 'service_type', 'status'
     ];
+
+    public function serviceType()
+    {
+        return $this->belongsTo(ServiceType::class);
+    }
 
     public function user()
     {

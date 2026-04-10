@@ -6,8 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center gap-3">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-brand-600 rounded flex items-center justify-center font-bold text-white shadow-lg shadow-brand-600/20">H</div>
-                        <span class="text-white font-outfit font-bold tracking-tight">HAALAND</span>
+                        <img src="{{ asset('assets/logo.png') }}" alt="Haaland Logistics" class="h-8 w-auto">
                     </a>
                 </div>
 
@@ -27,6 +26,12 @@
                         </x-nav-link>
                         <x-nav-link :href="route('admin.departures')" :active="request()->routeIs('admin.departures')" class="text-slate-300 hover:text-white transition-colors">
                             {{ __('Departures') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.services')" :active="request()->routeIs('admin.services')" class="text-slate-300 hover:text-white transition-colors">
+                            {{ __('Services') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.service-types')" :active="request()->routeIs('admin.service-types')" class="text-slate-300 hover:text-white transition-colors">
+                            {{ __('Types') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.external-shipments')" :active="request()->routeIs('admin.external-shipments')" class="text-slate-300 hover:text-white transition-colors">
                             {{ __('Ops Tool') }}

@@ -13,9 +13,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [AdminController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/users', [AdminController::class, 'users'])->name('users');
@@ -39,6 +37,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     Route::get('/external-shipments', [AdminController::class, 'externalShipments'])->name('external-shipments');
     Route::post('/external-shipments', [AdminController::class, 'storeExternalShipment'])->name('external-shipments.store');
+
+    Route::get('/services', [AdminController::class, 'services'])->name('services');
+    Route::post('/services', [AdminController::class, 'storeService'])->name('services.store');
+    Route::patch('/services/{service}', [AdminController::class, 'updateService'])->name('services.update');
+    Route::delete('/services/{service}', [AdminController::class, 'destroyService'])->name('services.destroy');
+
+    Route::get('/service-types', [AdminController::class, 'serviceTypes'])->name('service-types');
+    Route::post('/service-types', [AdminController::class, 'storeServiceType'])->name('service-types.store');
+    Route::patch('/service-types/{serviceType}', [AdminController::class, 'updateServiceType'])->name('service-types.update');
+    Route::delete('/service-types/{serviceType}', [AdminController::class, 'destroyServiceType'])->name('service-types.destroy');
 });
 Route::middleware('auth')->group(function () {
     Route::get('/quotes', [QuoteController::class, 'index'])->name('quotes.index');
