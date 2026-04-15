@@ -15,6 +15,8 @@ use App\Models\ShippingService;
 use App\Models\ServiceType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
@@ -42,21 +44,60 @@ class AdminController extends Controller
     public function updateSettings(Request $request)
     {
         $request->validate([
-            'origin_service_fee' => 'required|numeric|min:0',
-            'minimum_volume' => 'required|numeric|min:0',
+            'origin_service_fee' => 'sometimes|required|numeric|min:0',
+            'minimum_volume' => 'sometimes|required|numeric|min:0',
+            'mail_host' => 'nullable|string',
+            'mail_port' => 'nullable|integer',
+            'mail_username' => 'nullable|string',
+            'mail_password' => 'nullable|string',
+            'mail_encryption' => 'nullable|string|in:tls,ssl,null',
+            'mail_from_address' => 'nullable|email',
+            'mail_from_name' => 'nullable|string',
         ]);
 
-        \App\Models\SystemSetting::updateOrCreate(
-            ['key' => 'origin_service_fee'],
-            ['value' => $request->origin_service_fee, 'type' => 'decimal']
-        );
-        
-        \App\Models\SystemSetting::updateOrCreate(
-            ['key' => 'minimum_volume'],
-            ['value' => $request->minimum_volume, 'type' => 'decimal']
-        );
+        $settingsToUpdate = [
+            'origin_service_fee' => 'decimal',
+            'minimum_volume' => 'decimal',
+            'mail_host' => 'string',
+            'mail_port' => 'integer',
+            'mail_username' => 'string',
+            'mail_password' => 'string',
+            'mail_encryption' => 'string',
+            'mail_from_address' => 'string',
+            'mail_from_name' => 'string',
+        ];
+
+        foreach ($settingsToUpdate as $key => $type) {
+            if ($request->has($key)) {
+                \App\Models\SystemSetting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => $request->get($key), 'type' => $type]
+                );
+            }
+        }
 
         return back()->with('success', 'System settings updated successfully.');
+    }
+
+    public function testEmail(Request $request)
+    {
+        try {
+            $fromAddress = \App\Models\SystemSetting::where('key', 'mail_from_address')->value('value') 
+                ?? config('mail.from.address');
+
+            if (!$fromAddress) {
+                return back()->with('error', 'Please configure a "From Email Address" before testing.');
+            }
+
+            Mail::raw('This is a test email to verify SMTP settings for Haaland Logistics.', function ($message) use ($fromAddress) {
+                $message->to($fromAddress)
+                    ->subject('SMTP Connection Test');
+            });
+
+            return back()->with('success', 'Test email sent successfully to ' . $fromAddress);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Mail Error: ' . $e->getMessage());
+        }
     }
 
     public function rates()

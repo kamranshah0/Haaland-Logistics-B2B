@@ -28,6 +28,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    Route::post('/settings/test-email', [AdminController::class, 'testEmail'])->name('settings.test-email');
     
     Route::get('/rates', [AdminController::class, 'rates'])->name('rates');
     Route::post('/rates', [AdminController::class, 'storeRate'])->name('rates.store');
