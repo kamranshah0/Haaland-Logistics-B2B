@@ -60,10 +60,15 @@
                                         </div>
                                     </div>
 
-                                    <div class="pt-4 flex justify-end">
-                                        <button type="submit" class="btn-primary shadow-lg shadow-brand-500/30 flex items-center gap-2">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                            Save Pricing Settings
+                                    <div class="pt-4 flex justify-end" x-data="{ loading: false }">
+                                        <button type="submit" @click="loading = true" :disabled="loading" class="btn-primary shadow-lg shadow-brand-500/30 flex items-center gap-2 btn-loading-wrapper">
+                                            <div class="btn-spinner" :class="{ 'loading': loading }">
+                                                <div class="spinner-mini"></div>
+                                            </div>
+                                            <div class="flex items-center gap-2 btn-loading-text" :class="{ 'loading': loading }">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                Save Pricing Settings
+                                            </div>
                                         </button>
                                     </div>
                                 </div>
@@ -77,10 +82,15 @@
                                     <h3 class="text-lg font-bold text-slate-900 font-outfit">SMTP Configuration</h3>
                                     <p class="text-sm text-slate-500 mt-1">Configure your outgoing email server for notifications and quote alerts.</p>
                                 </div>
-                                <form action="{{ route('admin.settings.test-email') }}" method="POST">
+                                <form action="{{ route('admin.settings.test-email') }}" method="POST" x-data="{ loading: false }">
                                     @csrf
-                                    <button type="submit" class="text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg border border-brand-500 text-brand-700 hover:bg-brand-50 transition-all">
-                                        Send Test Email
+                                    <button type="submit" @click="loading = true" :disabled="loading" class="text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg border border-brand-500 text-brand-700 hover:bg-brand-50 transition-all btn-loading-wrapper min-w-[140px]">
+                                        <div class="btn-spinner" :class="{ 'loading': loading }">
+                                            <div class="spinner-mini !border-brand-500 !border-b-transparent"></div>
+                                        </div>
+                                        <div class="btn-loading-text" :class="{ 'loading': loading }">
+                                            Send Test Email
+                                        </div>
                                     </button>
                                 </form>
                             </div>
@@ -141,10 +151,15 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-10 flex justify-end">
-                                    <button type="submit" class="btn-primary shadow-lg shadow-brand-500/30 flex items-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                        Save Email Settings
+                                <div class="mt-10 flex justify-end" x-data="{ loading: false }">
+                                    <button type="submit" @click="loading = true" :disabled="loading" class="btn-primary shadow-lg shadow-brand-500/30 flex items-center gap-2 btn-loading-wrapper">
+                                        <div class="btn-spinner" :class="{ 'loading': loading }">
+                                            <div class="spinner-mini"></div>
+                                        </div>
+                                        <div class="flex items-center gap-2 btn-loading-text" :class="{ 'loading': loading }">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Save Email Settings
+                                        </div>
                                     </button>
                                 </div>
                             </form>

@@ -110,9 +110,14 @@
                         </div>
 
                         <!-- AJAX Form Submit Handler -->
-                        <button type="button" @click="submitQuote()" :disabled="!estimatedTotal || submitting" class="btn-primary w-full py-4 flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span x-text="submitting ? 'Generating...' : 'Generate Official Quote'"></span>
-                            <svg x-show="!submitting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        <button type="button" @click="submitQuote()" :disabled="!estimatedTotal || submitting" class="btn-primary w-full py-4 flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed btn-loading-wrapper">
+                            <div class="btn-spinner" :class="{ 'loading': submitting }">
+                                <div class="spinner-mini"></div>
+                            </div>
+                            <div class="flex items-center gap-2 btn-loading-text" :class="{ 'loading': submitting }">
+                                <span x-text="submitting ? 'Generating...' : 'Generate Official Quote'"></span>
+                                <svg x-show="!submitting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            </div>
                         </button>
                     </div>
                 </div>
