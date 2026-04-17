@@ -27,6 +27,9 @@
                         <x-nav-link :href="route('admin.departures')" :active="request()->routeIs('admin.departures')" class="text-slate-300 hover:text-white transition-colors">
                             {{ __('Departures') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.bookings.index')" :active="request()->routeIs('admin.bookings.index')" class="text-slate-300 hover:text-white transition-colors">
+                            {{ __('Bookings') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('admin.services')" :active="request()->routeIs('admin.services')" class="text-slate-300 hover:text-white transition-colors">
                             {{ __('Services') }}
                         </x-nav-link>

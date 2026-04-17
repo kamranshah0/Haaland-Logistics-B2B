@@ -47,6 +47,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     Route::get('/external-shipments', [AdminController::class, 'externalShipments'])->name('external-shipments');
     Route::post('/external-shipments', [AdminController::class, 'storeExternalShipment'])->name('external-shipments.store');
+
+    Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings.index');
     Route::post('/bookings/{booking}/toggle-status', [AdminController::class, 'toggleBookingStatus'])->name('bookings.toggle-status');
 
     Route::get('/services', [AdminController::class, 'services'])->name('services');

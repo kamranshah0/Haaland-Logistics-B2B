@@ -54,6 +54,9 @@
                 <div class="pt-6 pb-2 px-4">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Operations</p>
                 </div>
+                <x-sidebar-link :href="route('admin.bookings.index')" :active="request()->routeIs('admin.bookings.index')" icon="M20 13V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7m16 0a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2m16 0l-8 4-8-4">
+                    {{ __('Bookings') }}
+                </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.departures')" :active="request()->routeIs('admin.departures')" icon="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z">
                     {{ __('Departures') }}
                 </x-sidebar-link>

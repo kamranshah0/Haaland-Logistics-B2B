@@ -341,6 +341,16 @@ class AdminController extends Controller
         return back()->with('success', 'Booking status updated to ' . $newStatus);
     }
 
+    public function bookings()
+    {
+        $bookings = Booking::whereNotNull('quote_id')
+            ->with(['user', 'quote.origin', 'quote.country', 'departure'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('admin.bookings', compact('bookings'));
+    }
+
     public function approveUser(User $user)
     {
         $user->update(['status' => 'approved']);
