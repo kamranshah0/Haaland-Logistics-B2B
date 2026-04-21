@@ -15,7 +15,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
             <div class="premium-card">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Inquiries</p>
-                <p class="text-3xl font-bold font-outfit text-slate-900">{{ $leads->total() }}</p>
+                <p class="text-3xl font-bold font-outfit text-slate-900">{{ $leads->count() }}</p>
             </div>
             <div class="premium-card">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">New Leads</p>
@@ -24,7 +24,7 @@
             <div class="premium-card">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Conversion Rate</p>
                 @php
-                    $total = $leads->total();
+                    $total = $leads->count();
                     $converted = $leads->where('status', 'converted')->count();
                     $rate = $total > 0 ? ($converted / $total) * 100 : 0;
                 @endphp
@@ -40,13 +40,13 @@
 
             <div class="p-6">
                 <table class="datatable w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-brand-900 text-white text-[10px] uppercase tracking-widest font-bold">
-                            <th class="px-6 py-4">Business Email</th>
-                            <th class="px-6 py-4">Cargo Intent</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4">Submitted</th>
-                            <th class="px-6 py-4 text-right">Details</th>
+                    <thead class="bg-brand-900">
+                        <tr class="border-none">
+                            <th class="px-6 py-4 border-none !text-white text-[10px] uppercase tracking-widest font-bold">Business Email</th>
+                            <th class="px-6 py-4 border-none !text-white text-[10px] uppercase tracking-widest font-bold">Cargo Intent</th>
+                            <th class="px-6 py-4 border-none !text-white text-[10px] uppercase tracking-widest font-bold">Status</th>
+                            <th class="px-6 py-4 border-none !text-white text-[10px] uppercase tracking-widest font-bold">Submitted</th>
+                            <th class="px-6 py-4 border-none !text-white text-[10px] uppercase tracking-widest font-bold text-right">Details</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 italic">

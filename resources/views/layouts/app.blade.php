@@ -60,6 +60,7 @@
                     $('.datatable').DataTable({
                         responsive: true,
                         pageLength: 25,
+                        order: [[3, 'desc']], // Default sort by 'Submitted' column (index 3) descending
                         language: {
                             search: "<span class='text-xs font-bold text-brand-700 uppercase tracking-widest'>Search Database:</span>",
                             lengthMenu: "<span class='text-xs font-bold text-slate-500 uppercase tracking-widest'>Show _MENU_ entries</span>"

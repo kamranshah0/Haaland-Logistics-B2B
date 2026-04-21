@@ -18,12 +18,9 @@
         <!-- Navigation -->
         <nav class="fixed top-0 w-full z-50 bg-white border-b border-slate-100 px-6 py-4 shadow-sm">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-brand-700 rounded-lg flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-brand-700/20">
-                        HL
-                    </div>
-                    <span class="text-xl font-bold tracking-tight text-slate-900 font-outfit uppercase">Haaland <span class="text-brand-700 font-normal">Logistics</span></span>
-                </div>
+                <a href="/" class="flex items-center gap-3 no-underline">
+                    <img src="{{ asset('assets/Logo Red Black Large.png') }}" alt="Haaland Logistics" class="h-12 w-auto object-contain">
+                </a>
                 
                 <div class="flex items-center gap-6">
                     @if (Route::has('login'))
@@ -41,8 +38,8 @@
         </nav>
 
         <!-- Hero Section -->
-        <section class="pt-40 pb-20 px-6 overflow-hidden min-h-screen flex flex-col justify-start">
-            <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center w-full">
+        <section style="padding-top: 180px;" class="pb-20 px-6 overflow-hidden min-h-screen flex flex-col justify-start">
+            <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-start w-full">
                 <div class="animate-fade-in-up">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-700/10 border border-brand-700/20 text-brand-700 text-[10px] font-bold uppercase tracking-widest mb-8">
                         <span class="relative flex h-2 w-2">
@@ -59,12 +56,8 @@
                         The ultimate B2B platform for instant quotes, vessel scheduling, and real-time shipment management. Engineered for the modern supply chain.
                     </p>
                     
-                    <div class="flex items-center gap-6 p-1 pr-6 bg-white w-fit rounded-full shadow-lg border border-slate-100">
-                        <div class="flex -space-x-3 pl-3">
-                            <div class="w-10 h-10 rounded-full border-2 border-white bg-brand-700 flex items-center justify-center text-xs font-bold text-white">H</div>
-                            <div class="w-10 h-10 rounded-full border-2 border-white bg-slate-900 flex items-center justify-center text-xs font-bold text-white">L</div>
-                        </div>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Premium Portal <span class="text-emerald-500 mx-2">●</span> Active Hubs: <span class="text-slate-900">LA, Miami</span></p>
+                    <div class="flex items-center gap-6 p-4 px-8 bg-white w-fit rounded-full shadow-lg border border-slate-100">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest m-0">Premium Portal <span class="text-emerald-500 mx-2">●</span> Active Hubs: <span class="text-slate-900">LA, Miami</span></p>
                     </div>
                 </div>
 

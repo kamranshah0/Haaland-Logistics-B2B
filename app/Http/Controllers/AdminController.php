@@ -31,7 +31,7 @@ class AdminController extends Controller
 
     public function leads()
     {
-        $leads = \App\Models\Lead::with(['origin', 'country', 'region'])->orderBy('created_at', 'desc')->paginate(20);
+        $leads = \App\Models\Lead::with(['origin', 'country', 'region'])->orderBy('created_at', 'desc')->get();
         return view('admin.leads', compact('leads'));
     }
 
