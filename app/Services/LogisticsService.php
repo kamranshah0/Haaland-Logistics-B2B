@@ -9,7 +9,7 @@ use App\Models\Region;
 
 class LogisticsService
 {
-    const CBM_TO_CFT = 35.3147;
+    const CBM_TO_CFT = 35.34; // User requested 35.34
     const MIN_CFT = 100;
 
     /**
@@ -25,7 +25,7 @@ class LogisticsService
      */
     public function cftToCbm(float $cft): float
     {
-        return round($cft / self::CBM_TO_CFT, 2);
+        return round($cft / self::CBM_TO_CFT, 4);
     }
 
     /**
@@ -33,17 +33,24 @@ class LogisticsService
      */
     public function calculateQuote(int $originId, int $countryId, ?int $regionId, float $cft, string $serviceType): array
     {
+        // Settings
         $minVolSetting = \App\Models\SystemSetting::where('key', 'minimum_volume')->first();
         $minVol = $minVolSetting ? (float)$minVolSetting->value : self::MIN_CFT;
         
-        $serviceFeeSetting = \App\Models\SystemSetting::where('key', 'origin_service_fee')->first();
-        $serviceFeePerCft = $serviceFeeSetting ? (float)$serviceFeeSetting->value : 3.00;
+        $fxRateSetting = \App\Models\SystemSetting::where('key', 'eur_to_usd_rate')->first();
+        $fxRate = $fxRateSetting ? (float)$fxRateSetting->value : 1.08; // Default fallback
 
-        // Apply minimum volume rule
-        $billableCft = max($cft, $minVol);
+        $originFeeSetting = \App\Models\SystemSetting::where('key', 'origin_fee_usd')->first();
+        $originFeePerCft = $originFeeSetting ? (float)$originFeeSetting->value : 2.55; // Miami default
 
-        // Fetch Base Rate Entry
-        // Step 1: Search for specific Region + Country + Origin
+        // Internally work in CBM
+        $volCbm = $cft / self::CBM_TO_CFT;
+        $minVolCbm = $minVol / self::CBM_TO_CFT;
+        
+        // Apply minimum volume rule in CBM
+        $billableCbm = max($volCbm, $minVolCbm);
+
+        // Fetch Base Rate Entry (Source of Truth is EUR/CBM)
         $rate = Rate::where('origin_id', $originId)
             ->where('country_id', $countryId)
             ->where('service_type', $serviceType)
@@ -54,7 +61,7 @@ class LogisticsService
             })
             ->first();
 
-        // Step 2: Fallback to Country + Origin (Region NULL) if Step 1 failed
+        // Fallback to Country (Region NULL)
         if (!$rate && $regionId) {
             $rate = Rate::where('origin_id', $originId)
                 ->where('country_id', $countryId)
@@ -67,13 +74,12 @@ class LogisticsService
             return ['success' => false, 'message' => 'Rate not found for selected criteria.'];
         }
 
-        // Fetch Applicable Tier (The highest min_volume that is <= billableCft)
+        // Fetch Applicable Tier based on CBM
         $tier = \App\Models\RateTier::where('rate_id', $rate->id)
-            ->where('min_volume', '<=', $billableCft)
+            ->where('min_volume', '<=', $billableCbm)
             ->orderBy('min_volume', 'desc')
             ->first();
 
-        // If no tier found (e.g., volume is less than the first tier), fallback to the first tier
         if (!$tier) {
             $tier = \App\Models\RateTier::where('rate_id', $rate->id)
                 ->orderBy('min_volume', 'asc')
@@ -81,21 +87,25 @@ class LogisticsService
         }
 
         if (!$tier) {
-            return ['success' => false, 'message' => 'No pricing tiers defined for this route.'];
+            return ['success' => false, 'message' => 'No pricing tiers defined.'];
         }
 
-        $oceanFreight = $billableCft * $tier->price_per_cft;
-        $originHandling = $billableCft * $serviceFeePerCft;
-        $totalPrice = $oceanFreight + $originHandling;
+        // Calculation: (Rate EUR/CBM * Vol CBM * FX) + (Origin Fee USD * Vol CFT)
+        $oceanFreightEur = $billableCbm * $tier->price_per_cft; // Tier price is EUR/CBM
+        $oceanFreightUsd = $oceanFreightEur * $fxRate;
+        
+        $originHandlingUsd = $cft * $originFeePerCft;
+        $totalPriceUsd = $oceanFreightUsd + $originHandlingUsd;
 
         return [
             'success' => true,
-            'rate_per_cft' => $tier->price_per_cft,
-            'service_fee_per_cft' => $serviceFeePerCft,
-            'billable_cft' => $billableCft,
-            'ocean_freight' => round($oceanFreight, 2),
-            'origin_handling' => round($originHandling, 2),
-            'total_price' => round($totalPrice, 2),
+            'rate_per_cbm_eur' => $tier->price_per_cft,
+            'fx_rate' => $fxRate,
+            'billable_cft' => round($billableCbm * self::CBM_TO_CFT, 2),
+            'billable_cbm' => round($billableCbm, 4),
+            'ocean_freight_usd' => round($oceanFreightUsd, 2),
+            'origin_handling_usd' => round($originHandlingUsd, 2),
+            'total_price' => round($totalPriceUsd, 2),
             'applied_min' => $cft < $minVol
         ];
     }

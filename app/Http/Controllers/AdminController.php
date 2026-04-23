@@ -57,6 +57,8 @@ class AdminController extends Controller
 
         $settingsToUpdate = [
             'origin_service_fee' => 'decimal',
+            'origin_fee_usd' => 'decimal',
+            'eur_to_usd_rate' => 'decimal',
             'minimum_volume' => 'decimal',
             'mail_host' => 'string',
             'mail_port' => 'integer',
@@ -474,10 +476,13 @@ class AdminController extends Controller
                 'my_volume_cft' => Booking::where('bookings.user_id', $user->id)->join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.volume_cft'),
                 'recent_my_quotes' => Quote::where('user_id', $user->id)->latest()->take(5)->get(),
                 'recent_my_bookings' => Booking::where('user_id', $user->id)->with('quote.country')->latest()->take(5)->get(),
-                'upcoming_departures' => Departure::where('departure_date', '>', now())->orderBy('departure_date', 'asc')->take(3)->get(),
+                'upcoming_departures' => Departure::where('departure_date', '>', now())->orderBy('departure_date', 'asc')->take(5)->get(),
             ];
 
-            return view('dashboard', compact('stats'));
+            $warehouses = Warehouse::all();
+            $countries = Country::with('regions')->get();
+
+            return view('dashboard', compact('stats', 'warehouses', 'countries'));
         }
     }
 }

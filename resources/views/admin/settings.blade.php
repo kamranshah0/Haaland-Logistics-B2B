@@ -35,16 +35,28 @@
                                 <div class="space-y-6">
                                     <div class="p-5 bg-brand-50/50 border border-brand-100 rounded-xl relative overflow-hidden">
                                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>
-                                        <label for="origin_service_fee" class="block text-sm font-bold text-brand-900 mb-2 font-outfit flex items-center gap-2">
+                                        <label for="eur_to_usd_rate" class="block text-sm font-bold text-brand-900 mb-2 font-outfit flex items-center gap-2">
                                             <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                            Origin Service Fee
+                                            Currency Exchange Rate (EUR to USD)
                                         </label>
-                                        <p class="text-xs text-slate-500 mb-3 ml-6 leading-relaxed">Added as "Origin Handling" to every new shipping quote. (Default: $3.00)</p>
+                                        <p class="text-xs text-slate-500 mb-3 ml-6 leading-relaxed">Daily source of truth for converting backend EUR rates to client USD quotes. (Source of Truth: EUR/CBM)</p>
                                         <div class="flex items-center gap-3 ml-6">
+                                            <span class="text-sm text-slate-400 font-bold">1 EUR = </span>
+                                            <input type="number" step="0.0001" name="eur_to_usd_rate" id="eur_to_usd_rate" 
+                                                value="{{ old('eur_to_usd_rate', $settings['eur_to_usd_rate']->value ?? '1.0850') }}" 
+                                                class="input-premium w-40 font-mono text-lg text-slate-900" required>
+                                            <span class="text-sm text-slate-500 font-bold">USD</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-5 bg-white border border-slate-200 rounded-xl">
+                                        <label for="origin_fee_usd" class="block text-sm font-bold text-slate-700 mb-2 font-outfit">Origin Service Fee (USD)</label>
+                                        <p class="text-xs text-slate-500 mb-3 leading-relaxed">Fixed USD charge added per CFT to every quote. (User specified: $2.55 for Miami)</p>
+                                        <div class="flex items-center gap-3">
                                             <span class="text-slate-400 font-bold">$</span>
-                                            <input type="number" step="0.01" name="origin_service_fee" id="origin_service_fee" 
-                                                value="{{ old('origin_service_fee', $settings['origin_service_fee']->value ?? '3.00') }}" 
-                                                class="input-premium w-32 font-mono text-lg text-slate-900" required>
+                                            <input type="number" step="0.01" name="origin_fee_usd" id="origin_fee_usd" 
+                                                value="{{ old('origin_fee_usd', $settings['origin_fee_usd']->value ?? '2.55') }}" 
+                                                class="input-premium w-32 font-mono text-slate-900" required>
                                             <span class="text-sm text-slate-500 font-bold">per CFT</span>
                                         </div>
                                     </div>

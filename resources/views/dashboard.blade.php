@@ -235,74 +235,365 @@
             </div>
 
         @else
-            <!-- CLIENT DASHBOARD (Tailored Stats) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up">
-                <div class="premium-card">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">My Quotes</p>
-                    <p class="text-4xl font-bold text-slate-900 font-outfit">{{ $stats['my_quotes_count'] }}</p>
-                </div>
-                <div class="premium-card">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">My Bookings</p>
-                    <p class="text-4xl font-bold text-brand-700 font-outfit">{{ $stats['my_bookings_count'] }}</p>
-                </div>
-                <div class="premium-card">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Freight Volume</p>
-                    <p class="text-4xl font-bold text-slate-900 font-outfit">{{ number_format($stats['my_volume_cft'], 0) }} <span class="text-sm">CFT</span></p>
-                </div>
-                <div class="premium-card">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Total Logistics Spend</p>
-                    <p class="text-4xl font-bold text-slate-900 font-outfit">${{ number_format($stats['my_total_spending'], 2) }}</p>
-                </div>
-            </div>
-
-            <!-- Recent Items for Client -->
-            <div class="grid lg:grid-cols-2 gap-8 animate-fade-in-up" style="animation-delay: 0.1s">
-                <div class="premium-card bg-white">
-                    <h3 class="text-lg font-bold mb-6 font-outfit border-b pb-4">Recent Bookings</h3>
-                    <div class="space-y-4">
-                        @forelse($stats['recent_my_bookings'] as $b)
-                            <div class="flex justify-between items-center p-4 bg-slate-50 rounded-xl">
-                                <div>
-                                    <p class="text-sm font-bold">#{{ $b->booking_number }}</p>
-                                    <p class="text-[10px] uppercase text-slate-400">{{ $b->created_at->format('M d, Y') }}</p>
-                                </div>
-                                <p class="text-brand-700 font-bold">${{ number_format($b->quote->total_price ?? 0, 2) }}</p>
-                            </div>
-                        @empty
-                            <p class="text-slate-400 italic text-sm text-center py-6">No bookings yet.</p>
-                        @endforelse
+            <!-- GRP PLATFORM DASHBOARD (Tailored for Haaland Logistics) -->
+            <div class="space-y-6 animate-fade-in-up" x-data="grpCalculator(@js($warehouses), @js($countries))">
+                
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm border-t-4 border-t-[#1A5161]">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-[#1A5161] p-3 rounded-xl shadow-inner">
+                            <img src="{{ asset('assets/logo.png') }}" alt="Haaland Logistics" class="h-10 w-auto object-contain">
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-[#1A5161] font-outfit uppercase tracking-tight">GRP Platform for Household Goods</h2>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Global Consolidation & Quoting Engine</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Welcome, <span class="text-slate-900">{{ Auth::user()->name }}</span></p>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 bg-[#1A5161] text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-slate-800 transition-all shadow-md">Log Out</button>
+                        </form>
                     </div>
                 </div>
-                <div class="premium-card bg-brand-700 text-white flex flex-col justify-center items-center text-center p-12">
-                    <h3 class="text-2xl font-bold font-outfit mb-4 italic uppercase">Need a new rate?</h3>
-                    <p class="text-brand-200 text-sm mb-8">Get instant pricing and book your space in seconds.</p>
-                    <a href="{{ route('quotes.create') }}" class="px-8 py-4 bg-white text-brand-900 font-bold rounded-xl shadow-xl hover:bg-slate-100 transition-all uppercase tracking-widest text-xs">Start New Quote</a>
-                </div>
-            </div>
 
-            <!-- Client: Next Vessels Visibility -->
-            <div class="premium-card flex flex-col bg-slate-900 text-white border-none shadow-2xl animate-fade-in-up md:col-span-2 lg:col-span-1 mt-8" style="animation-delay: 0.2s">
-                <h3 class="text-xl font-bold mb-8 font-outfit uppercase tracking-tight italic">Operations Strip</h3>
-                <div class="space-y-8 flex-1">
-                    @forelse($stats['upcoming_departures'] as $dep)
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em] px-1">
-                                <span class="text-slate-200">Terminal Cutoff</span>
-                                <span class="text-emerald-400">Next Up</span>
+                <!-- MAIN WORKSPACE -->
+                <div class="grid lg:grid-cols-3 gap-6">
+                    
+                    <!-- LEFT: SHIPMENT DETAILS FORM -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-8 border-b border-slate-50 pb-4">Shipment Details</h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Volume & Unit -->
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Volume</label>
+                                        <div class="flex items-center gap-4">
+                                            <label class="flex items-center gap-2 cursor-pointer group">
+                                                <input type="radio" x-model="unit" value="CFT" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]" @change="calculate()">
+                                                <span class="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 transition-colors uppercase">CFT</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 cursor-pointer group">
+                                                <input type="radio" x-model="unit" value="CBM" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]" @change="calculate()">
+                                                <span class="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 transition-colors uppercase">CBM</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="number" x-model="volume" @input="calculate()" class="input-premium w-full !bg-slate-50/50 !border-slate-200 !text-xl font-bold font-mono !py-4" placeholder="0.00">
+                                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Drop-off Warehouse</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <template x-for="w in warehouses" :key="w.id">
+                                            <label class="relative cursor-pointer">
+                                                <input type="radio" x-model="originId" :value="w.id" class="sr-only peer" @change="calculate()">
+                                                <div class="p-3 border border-slate-200 rounded-xl text-center peer-checked:border-[#1A5161] peer-checked:bg-[#1A5161]/5 transition-all">
+                                                    <span class="block text-[10px] font-bold text-slate-400 peer-checked:text-[#1A5161] uppercase tracking-wider" x-text="w.name"></span>
+                                                </div>
+                                            </label>
+                                        </template>
+                                        <!-- Dallas Placeholder -->
+                                        <div class="p-3 border border-slate-100 bg-slate-50 rounded-xl text-center opacity-60">
+                                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider italic">Dallas, TX</span>
+                                            <span class="block text-[8px] text-[#ED1C24] font-bold uppercase tracking-widest mt-1">Coming Soon</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="bg-white/10 p-4 rounded-2xl border border-white/20">
-                                <p class="text-sm font-bold text-white mb-1">{{ $dep->vessel_name ?: 'Vessel TBA' }}</p>
-                                <div class="flex justify-between items-center text-[10px] text-white/60">
-                                    <span class="font-bold text-white">{{ $dep->cutoff_date->format('M d, Y') }}</span>
-                                    <span>Voyage #{{ $dep->voyage_number }}</span>
+
+                            <!-- Destination & Service -->
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Destination Region / Option</label>
+                                    <div class="space-y-3">
+                                        <select x-model="countryId" @change="updateRegions()" class="input-premium w-full !bg-slate-50/50">
+                                            <option value="">Select Country</option>
+                                            <template x-for="c in countries" :key="c.id">
+                                                <option :value="c.id" x-text="c.name"></option>
+                                            </template>
+                                        </select>
+                                        <div x-show="regions.length > 0">
+                                            <select x-model="regionId" @change="calculate()" class="input-premium w-full !bg-slate-50/50">
+                                                <option value="">Select Region / Logic</option>
+                                                <template x-for="r in regions" :key="r.id">
+                                                    <option :value="r.id" x-text="r.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Service Type</label>
+                                    <div class="space-y-3">
+                                        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:border-[#1A5161]/30 transition-all group">
+                                            <input type="radio" x-model="serviceType" value="Warehouse to Door" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]" checked @change="calculate()">
+                                            <div>
+                                                <p class="text-[10px] font-bold text-slate-900 uppercase tracking-wide">Warehouse to Door</p>
+                                                <p class="text-[8px] text-slate-400 uppercase tracking-widest">Full consolidation & delivery</p>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:border-[#1A5161]/30 transition-all group">
+                                            <input type="radio" x-model="serviceType" value="Warehouse to Port" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]" @change="calculate()">
+                                            <div>
+                                                <p class="text-[10px] font-bold text-slate-900 uppercase tracking-wide">Warehouse to Port</p>
+                                                <p class="text-[8px] text-slate-400 uppercase tracking-widest">Client pickup at destination</p>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    @empty
-                        <p class="text-slate-500 italic text-xs text-center py-6">No active voyages found.</p>
-                    @endforelse
+
+                        <div class="mt-10 pt-8 border-t border-slate-50">
+                            <textarea x-model="notes" class="input-premium w-full !bg-slate-50/20 text-xs" rows="3" placeholder="Additional Notes: Vehicle, Pallet, Special Requirements..."></textarea>
+                            <div class="flex flex-wrap gap-4 mt-6">
+                                <button type="button" @click="calculate()" class="px-8 py-4 bg-[#1A5161] text-white font-bold rounded-xl shadow-lg hover:bg-slate-800 transition-all uppercase tracking-widest text-[10px]">Calculate Quote</button>
+                                <button type="button" @click="bookSpace()" :disabled="!calculation" class="px-8 py-4 bg-white border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition-all uppercase tracking-widest text-[10px] flex items-center gap-2 disabled:opacity-50">
+                                    <svg class="w-4 h-4 text-[#1A5161]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"></path></svg>
+                                    Book Space
+                                </button>
+                                <button type="button" @click="resetForm()" class="px-8 py-4 text-slate-400 font-bold hover:text-slate-600 transition-all uppercase tracking-widest text-[10px]">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: PRICE BREAKDOWN -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm flex flex-col">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-8 border-b border-slate-50 pb-4">Estimated Price <span class="text-[10px] ml-1">(USD)</span></h3>
+                        
+                        <div class="flex-1 space-y-5">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-500">Origin Handling</span>
+                                <span class="font-bold text-slate-900" x-text="calculation ? '$' + calculation.origin_handling_usd : '$0.00'">$0.00</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <div class="flex flex-col">
+                                    <span class="text-slate-500">Ocean Freight</span>
+                                    <span class="text-[9px] text-slate-400 font-mono" x-show="calculation" x-text="`(${calculation.billable_cft} CFT × $${(calculation.ocean_freight_usd / calculation.billable_cft).toFixed(2)})`"></span>
+                                </div>
+                                <span class="font-bold text-slate-900" x-text="calculation ? '$' + calculation.ocean_freight_usd : '$0.00'">$0.00</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs opacity-40">
+                                <span class="text-slate-500">Destination Charges</span>
+                                <span class="font-bold text-slate-900">$0.00</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs opacity-40">
+                                <span class="text-slate-500">Documentation</span>
+                                <span class="font-bold text-slate-900">$0.00</span>
+                            </div>
+
+                            <div class="mt-8 pt-6 border-t-2 border-slate-50 flex justify-between items-end">
+                                <p class="text-xs font-bold text-slate-900 uppercase tracking-widest">Total</p>
+                                <p class="text-3xl font-bold text-[#1A5161] font-outfit" x-text="calculation ? '$' + calculation.total_price.toLocaleString() : '$0.00'">$0.00</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-10 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Next Departure:</p>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-slate-900" x-text="nextDeparture ? nextDeparture.departure_date : 'No Departure scheduled'">---</span>
+                                <span class="px-2 py-0.5 bg-white border border-slate-200 rounded text-[8px] font-bold text-slate-400" x-text="nextDeparture ? nextDeparture.cutoff_date : '---'">---</span>
+                            </div>
+                            <p class="text-[9px] text-slate-400 uppercase tracking-widest" x-show="nextDeparture">Cutoff: <span class="text-[#ED1C24] font-bold" x-text="nextDeparture.cutoff_date">---</span></p>
+                        </div>
+
+                        <!-- Progress Section (Transparency Details) -->
+                        <div class="mt-6 space-y-3 pt-6 border-t border-slate-50">
+                            <div class="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                                <span>Billable CBM</span>
+                                <span class="text-slate-900" x-text="calculation ? calculation.billable_cbm + ' CBM' : '--'"></span>
+                            </div>
+                            <div class="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                                <span>Exchange Rate (EUR/USD)</span>
+                                <span class="text-slate-900" x-text="calculation ? calculation.fx_rate : '--'"></span>
+                            </div>
+                            <div class="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400" x-show="calculation && calculation.applied_min">
+                                <span class="text-[#ED1C24]">Min. Volume Applied</span>
+                                <span class="text-[#ED1C24]">Yes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM: UPCOMING CONTAINERS -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-8">
+                    <div class="p-6 border-b border-slate-50 flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Upcoming Containers</h3>
+                        <a href="{{ route('quotes.index') }}" class="text-[10px] font-bold text-slate-400 uppercase hover:text-[#1A5161] transition-all no-underline">View All &rsaquo;</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lane</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Departure</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cutoff</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                @foreach($stats['upcoming_departures'] as $dep)
+                                    <tr class="hover:bg-slate-50/50 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <span class="w-2 h-2 rounded-full bg-[#1A5161]"></span>
+                                                <span class="text-xs font-bold text-slate-900 uppercase tracking-wide">Miami &rsaquo; {{ $dep->vessel_name ?: 'Global Port' }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-xs text-slate-600 font-medium">{{ $dep->departure_date->format('M d, Y') }}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 bg-red-50 text-[#ED1C24] text-[10px] font-bold rounded uppercase tracking-tighter">{{ $dep->cutoff_date->format('M d, Y') }}</span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <button class="text-[#1A5161] hover:text-slate-900 transition-colors">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- FOOTER STRIP -->
+                <div class="flex flex-wrap justify-center gap-8 py-8 opacity-60">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-[#1A5161]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Weekly Consolidations</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-[#1A5161]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Transparent Pricing</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-[#1A5161]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Live Departure Tracking</span>
+                    </div>
                 </div>
             </div>
+
+            <!-- Dashboard Logic Script -->
+            <script>
+                function grpCalculator(warehouses, countries) {
+                    return {
+                        warehouses: warehouses,
+                        countries: countries,
+                        originId: '',
+                        countryId: '',
+                        regionId: '',
+                        regions: [],
+                        volume: 0,
+                        unit: 'CFT',
+                        serviceType: 'Warehouse to Door',
+                        notes: '',
+                        calculation: null,
+                        nextDeparture: null,
+                        loading: false,
+
+                        init() {
+                            if (this.warehouses.length > 0) this.originId = this.warehouses[0].id;
+                            this.fetchNextDeparture();
+                        },
+
+                        updateRegions() {
+                            const country = this.countries.find(c => c.id == this.countryId);
+                            this.regions = country ? country.regions : [];
+                            this.regionId = '';
+                            this.calculate();
+                        },
+
+                        async calculate() {
+                            if (!this.originId || !this.countryId || this.volume <= 0) {
+                                this.calculation = null;
+                                return;
+                            }
+
+                            this.loading = true;
+                            const params = new URLSearchParams({
+                                origin_id: this.originId,
+                                country_id: this.countryId,
+                                region_id: this.regionId,
+                                volume: this.volume,
+                                volume_unit: this.unit,
+                                service_type: this.serviceType
+                            });
+
+                            try {
+                                const response = await fetch(`{{ route('quotes.calculate') }}?${params.toString()}`);
+                                const data = await response.json();
+                                if (data.success) {
+                                    this.calculation = data;
+                                } else {
+                                    this.calculation = null;
+                                }
+                            } catch (e) {
+                                console.error('Calculation Error:', e);
+                            } finally {
+                                this.loading = false;
+                            }
+                        },
+
+                        fetchNextDeparture() {
+                            // Simplified for demo - usually a separate API or passed via blade
+                            @if(count($stats['upcoming_departures']) > 0)
+                                const dep = @js($stats['upcoming_departures'][0]);
+                                this.nextDeparture = {
+                                    departure_date: new Date(dep.departure_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                                    cutoff_date: new Date(dep.cutoff_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                };
+                            @endif
+                        },
+
+                        async bookSpace() {
+                            if (!this.calculation) return;
+                            
+                            // Redirect to official quote store
+                            const formData = new FormData();
+                            formData.append('_token', '{{ csrf_token() }}');
+                            formData.append('origin_id', this.originId);
+                            formData.append('country_id', this.countryId);
+                            formData.append('region_id', this.regionId);
+                            formData.append('volume', this.volume);
+                            formData.append('volume_unit', this.unit);
+                            formData.append('service_type', this.serviceType);
+                            formData.append('notes', this.notes);
+
+                            try {
+                                const response = await fetch('{{ route("quotes.store") }}', {
+                                    method: 'POST',
+                                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                                    body: formData
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Booking request submitted!', type: 'success' }}));
+                                    setTimeout(() => window.location.href = data.redirect, 1500);
+                                }
+                            } catch (e) {
+                                console.error('Booking Error:', e);
+                            }
+                        },
+
+                        resetForm() {
+                            this.volume = 0;
+                            this.countryId = '';
+                            this.regionId = '';
+                            this.notes = '';
+                            this.calculation = null;
+                        }
+                    }
+                }
+            </script>
         @endif
     </div>
 </x-app-layout>
