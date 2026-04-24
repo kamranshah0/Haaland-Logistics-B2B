@@ -83,4 +83,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/clear-all', [NotificationController::class, 'clearAll'])->name('notifications.clear-all');
 });
 
+Route::get('/migrate', function () {
+    \Illuminate\Support\Facades\Artisan::call('migrate');
+    return 'Database migrated successfully!';
+});
+
 require __DIR__.'/auth.php';
+
