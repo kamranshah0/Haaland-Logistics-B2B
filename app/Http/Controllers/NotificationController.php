@@ -10,7 +10,21 @@ class NotificationController extends Controller
     /**
      * Get unread notifications for the authenticated user.
      */
-    public function index()
+    public function index(Request $request)
+    {
+        $notifications = Auth::user()->notifications()->paginate(20);
+
+        if ($request->expectsJson()) {
+            return response()->json($notifications);
+        }
+
+        return view('notifications.index', compact('notifications'));
+    }
+
+    /**
+     * Fetch notifications for the dropdown.
+     */
+    public function fetch()
     {
         return response()->json([
             'unread_count' => Auth::user()->unreadNotifications->count(),
@@ -28,31 +42,43 @@ class NotificationController extends Controller
     /**
      * Mark a notification as read.
      */
-    public function markAsRead($id)
+    public function markAsRead($id, Request $request)
     {
         $notification = Auth::user()->notifications()->findOrFail($id);
         $notification->markAsRead();
 
-        return response()->json(['success' => true]);
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Notification marked as read.');
     }
 
     /**
      * Mark all notifications as read.
      */
-    public function markAllAsRead()
+    public function markAllAsRead(Request $request)
     {
         Auth::user()->unreadNotifications->markAsRead();
 
-        return response()->json(['success' => true]);
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'All notifications marked as read.');
     }
 
     /**
      * Clear all notifications.
      */
-    public function clearAll()
+    public function clearAll(Request $request)
     {
         Auth::user()->notifications()->delete();
 
-        return response()->json(['success' => true]);
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Notification history cleared.');
     }
 }

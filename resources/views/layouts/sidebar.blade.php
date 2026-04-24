@@ -134,7 +134,7 @@
                         }
                     },
                     fetchNotifications() {
-                        fetch('{{ route('notifications.index') }}')
+                        fetch('{{ route('notifications.fetch') }}')
                             .then(res => res.json())
                             .then(data => {
                                 this.notifications = data.notifications;
@@ -214,7 +214,7 @@
                                 </template>
                             </div>
                             <div class="p-3 bg-slate-50 border-t border-slate-100 text-center">
-                                <a href="#" class="text-[10px] font-bold text-slate-400 hover:text-brand-700 uppercase tracking-widest transition-colors">View All History</a>
+                                <a href="{{ route('notifications.index') }}" class="text-[10px] font-bold text-slate-400 hover:text-brand-700 uppercase tracking-widest transition-colors">View All History</a>
                             </div>
                         </div>
                     </div>
