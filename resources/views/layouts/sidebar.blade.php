@@ -114,9 +114,110 @@
 
             <div class="flex items-center gap-6">
                 <!-- Notifications -->
-                <div class="relative cursor-pointer text-slate-400 hover:text-brand-700 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-accent-500 rounded-full border-2 border-white"></span>
+                <div class="hidden sm:flex sm:items-center sm:ms-4" x-data="{ 
+                    notifications: [], 
+                    unreadCount: 0, 
+                    showNotifications: false,
+                    init() {
+                        this.fetchNotifications();
+                        if (window.Echo) {
+                            window.Echo.private(`App.Models.User.{{ Auth::id() }}`)
+                                .notification((notification) => {
+                                    this.notifications.unshift({
+                                        id: notification.id,
+                                        data: notification,
+                                        created_at: 'Just now',
+                                        read_at: null
+                                    });
+                                    this.unreadCount++;
+                                });
+                        }
+                    },
+                    fetchNotifications() {
+                        fetch('{{ route('notifications.index') }}')
+                            .then(res => res.json())
+                            .then(data => {
+                                this.notifications = data.notifications;
+                                this.unreadCount = data.unread_count;
+                            });
+                    },
+                    markAsRead(id) {
+                        fetch(`/notifications/${id}/read`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(() => {
+                            this.notifications = this.notifications.map(n => n.id === id ? { ...n, read_at: new Date() } : n);
+                            this.unreadCount = Math.max(0, this.unreadCount - 1);
+                        });
+                    }
+                }">
+                    <div class="relative">
+                        <button @click.stop="showNotifications = !showNotifications; if(showNotifications) fetchNotifications()" 
+                                class="p-2 text-slate-600 hover:text-brand-700 transition-all duration-200 focus:outline-none relative">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <template x-if="unreadCount > 0">
+                                <span class="absolute top-1 right-1 flex h-3 w-3">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-500 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-600 text-[8px] items-center justify-center font-bold text-white shadow-lg" x-text="unreadCount"></span>
+                                </span>
+                            </template>
+                        </button>
+
+                        <!-- Dropdown -->
+                        <div x-show="showNotifications" 
+                             x-cloak
+                             @click.away="showNotifications = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50">
+                            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Notifications</h3>
+                                <button @click="fetchNotifications()" class="text-xs text-brand-700 hover:text-brand-600 font-bold uppercase">Refresh</button>
+                            </div>
+                            <div class="max-h-96 overflow-y-auto custom-scrollbar">
+                                <template x-for="notification in notifications" :key="notification.id">
+                                    <div class="p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer relative"
+                                         :class="notification.read_at ? 'opacity-60' : 'bg-brand-50/30'"
+                                         @click="if(!notification.read_at) markAsRead(notification.id); window.location.href = notification.data.link">
+                                        <div class="flex gap-3">
+                                            <div class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                                                 :class="{
+                                                     'bg-brand-100 text-brand-600': notification.data.type === 'info',
+                                                     'bg-green-100 text-green-600': notification.data.type === 'success',
+                                                     'bg-red-100 text-red-600': notification.data.type === 'error'
+                                                 }">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-xs font-bold text-slate-900" x-text="notification.data.title"></p>
+                                                <p class="text-[11px] text-slate-500 mt-0.5" x-text="notification.data.message"></p>
+                                                <p class="text-[10px] text-slate-400 mt-2 font-medium" x-text="notification.created_at"></p>
+                                            </div>
+                                            <template x-if="!notification.read_at">
+                                                <div class="w-2 h-2 rounded-full bg-brand-500 mt-1"></div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="notifications.length === 0">
+                                    <div class="p-8 text-center">
+                                        <p class="text-sm text-slate-500 italic">No notifications yet</p>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="p-3 bg-slate-50 border-t border-slate-100 text-center">
+                                <a href="#" class="text-[10px] font-bold text-slate-400 hover:text-brand-700 uppercase tracking-widest transition-colors">View All History</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Profile Link -->

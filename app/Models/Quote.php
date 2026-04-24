@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Notifications\SystemNotification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Notification;
+use App\Models\User;
 
 class Quote extends Model
 {
@@ -39,5 +42,20 @@ class Quote extends Model
     public function booking()
     {
         return $this->hasOne(Booking::class);
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($quote) {
+            // Notify Admin
+            $admins = User::where('role', 'admin')->get();
+            Notification::send($admins, new SystemNotification([
+                'title' => 'New Quote Request',
+                'message' => "A new quote request ({$quote->reference_number}) has been submitted by {$quote->user->name}.",
+                'type' => 'info',
+                'link' => route('dashboard'), // Change to admin quotes if exists
+                'icon' => 'document-text'
+            ]));
+        });
     }
 }

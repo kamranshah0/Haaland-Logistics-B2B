@@ -60,6 +60,10 @@
     .custom-scrollbar::-webkit-scrollbar-thumb {
         @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-all;
     }
+
+    .glass {
+        @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-2xl;
+    }
 }
 
 /* Global Page Loader */
