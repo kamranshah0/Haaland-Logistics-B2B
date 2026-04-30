@@ -24,7 +24,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::post('/users/{user}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
     Route::post('/users/{user}/reject', [AdminController::class, 'rejectUser'])->name('users.reject');
+    Route::post('/users/{user}/pause', [AdminController::class, 'pauseUser'])->name('users.pause');
     
+    Route::get('/quotes', [AdminController::class, 'quotes'])->name('quotes.index');
+    Route::post('/quotes/{quote}/accept', [AdminController::class, 'acceptQuote'])->name('quotes.accept');
+    Route::post('/quotes/{quote}/reject', [AdminController::class, 'rejectQuote'])->name('quotes.reject');
     Route::get('/leads', [AdminController::class, 'leads'])->name('leads');
     
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
@@ -45,6 +49,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/warehouses', [AdminController::class, 'storeWarehouse'])->name('warehouses.store');
     Route::patch('/warehouses/{warehouse}', [AdminController::class, 'updateWarehouse'])->name('warehouses.update');
     Route::delete('/warehouses/{warehouse}', [AdminController::class, 'destroyWarehouse'])->name('warehouses.destroy');
+    Route::post('/warehouses/poe-mapping', [AdminController::class, 'storePoeMapping'])->name('warehouses.poe-mapping.store');
+    Route::delete('/warehouses/poe-mapping/{mapping}', [AdminController::class, 'destroyPoeMapping'])->name('warehouses.poe-mapping.destroy');
     
     Route::get('/external-shipments', [AdminController::class, 'externalShipments'])->name('external-shipments');
     Route::post('/external-shipments', [AdminController::class, 'storeExternalShipment'])->name('external-shipments.store');

@@ -10,9 +10,14 @@ use App\Models\User;
 class Quote extends Model
 {
     protected $fillable = [
-        'user_id', 'reference_number', 'origin_id', 'country_id', 'region_id',
+        'user_id', 'reference_number', 'origin_id', 'country_id', 'region_id', 'destination_warehouse_id',
         'volume_cbm', 'volume_cft', 'billable_volume_cft', 'rate_per_cft', 'total_price', 'service_type_id', 'service_type', 'status'
     ];
+
+    public function destination()
+    {
+        return $this->belongsTo(Warehouse::class, 'destination_warehouse_id');
+    }
 
     public function serviceType()
     {

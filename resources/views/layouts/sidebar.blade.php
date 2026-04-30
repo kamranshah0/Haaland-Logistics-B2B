@@ -6,8 +6,14 @@
         
         <!-- Sidebar Branding -->
         <div class="h-24 flex items-center px-8 border-b border-white/5 bg-slate-950">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 no-underline uppercase tracking-tight">
-                <img src="{{ asset('assets/logo.png') }}" alt="Haaland Logistics" class="h-10 w-auto object-contain">
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 no-underline group">
+                <div class="w-10 h-10 bg-brand-900 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg border-b-4 border-brand-600 group-hover:scale-105 transition-transform">
+                    H
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-white font-black text-xl tracking-tighter leading-none group-hover:text-brand-400 transition-colors">HAALAND</span>
+                    <span class="text-brand-600 font-bold text-[10px] tracking-[0.3em] leading-none mt-1">LOGISTICS</span>
+                </div>
             </a>
         </div>
 
@@ -35,6 +41,9 @@
                 <x-sidebar-link :href="route('admin.users')" :active="request()->routeIs('admin.users')" icon="M12 4.354a4 4 0 1 1 0 5.292M15 21H3v-1a6 6 0 0 1 12 0v1zm0 0h6v-1a6 6 0 0 0-9-5.197M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z">
                     {{ __('Clients') }}
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.quotes.index')" :active="request()->routeIs('admin.quotes.index')" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z">
+                    {{ __('Quotes') }}
+                </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.warehouses')" :active="request()->routeIs('admin.warehouses')" icon="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5m-4 0h4">
                     {{ __('Warehouses') }}
                 </x-sidebar-link>
@@ -42,7 +51,7 @@
                     {{ __('Rates') }}
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.leads')" :active="request()->routeIs('admin.leads')" icon="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206">
-                    {{ __('Inquiries') }}
+                    {{ __('Leads') }}
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.services')" :active="request()->routeIs('admin.services')" icon="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4">
                     {{ __('Services') }}

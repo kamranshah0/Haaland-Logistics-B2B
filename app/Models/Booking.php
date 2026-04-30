@@ -12,8 +12,13 @@ class Booking extends Model
     protected $fillable = [
         'quote_id', 'user_id', 'booking_number', 'drop_off_date', 
         'drop_off_time', 'status', 'departure_id', 'is_special_request',
-        'external_reference', 'external_volume_cft'
+        'external_reference', 'external_volume_cft', 'destination_warehouse_id'
     ];
+
+    public function destination()
+    {
+        return $this->belongsTo(Warehouse::class, 'destination_warehouse_id');
+    }
 
     public function quote()
     {

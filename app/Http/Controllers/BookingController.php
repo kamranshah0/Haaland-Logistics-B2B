@@ -72,6 +72,7 @@ class BookingController extends Controller
             'drop_off_time' => $request->drop_off_time,
             'status' => 'pending',
             'is_special_request' => $isSpecial,
+            'destination_warehouse_id' => $quote->destination_warehouse_id,
         ]);
 
         $quote->update(['status' => 'booked']);

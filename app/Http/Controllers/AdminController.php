@@ -20,13 +20,82 @@ use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
-    public function users()
+    public function users(Request $request)
     {
-        $users = User::where('role', 'client')
+        $query = User::where('role', 'client');
+
+        // Search
+        if ($request->has('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('company_name', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by Company
+        if ($request->has('company') && $request->company != '') {
+            $query->where('company_name', $request->company);
+        }
+
+        // Sorting
+        $sort = $request->get('sort', 'created_at');
+        $direction = $request->get('direction', 'desc');
+        
+        $allowedSorts = ['name', 'company_name', 'created_at', 'status'];
+        if (in_array($sort, $allowedSorts)) {
+            $query->orderBy($sort, $direction);
+        }
+
+        $users = $query->paginate(15)->withQueryString();
+        
+        $companies = User::where('role', 'client')
+            ->whereNotNull('company_name')
+            ->distinct()
+            ->pluck('company_name');
+
+        return view('admin.users', compact('users', 'companies'));
+    }
+
+    public function pauseUser(User $user)
+    {
+        $user->update(['status' => 'paused']);
+        return back()->with('success', "User {$user->name} has been paused.");
+    }
+
+    public function quotes()
+    {
+        $quotes = Quote::with(['user', 'origin', 'country', 'region', 'destination'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        return view('admin.users', compact('users'));
+        return view('admin.quotes', compact('quotes'));
+    }
+
+    public function acceptQuote(Quote $quote)
+    {
+        if ($quote->booking) {
+            return back()->with('error', 'Booking already exists for this quote.');
+        }
+
+        $booking = \App\Models\Booking::create([
+            'quote_id' => $quote->id,
+            'user_id' => $quote->user_id,
+            'booking_number' => 'HL-' . strtoupper(\Illuminate\Support\Str::random(8)),
+            'status' => 'pending',
+            'destination_warehouse_id' => $quote->destination_warehouse_id,
+        ]);
+
+        $quote->update(['status' => 'booked']);
+
+        return back()->with('success', "Quote {$quote->reference_number} has been accepted and converted to Booking {$booking->booking_number}.");
+    }
+
+    public function rejectQuote(Quote $quote)
+    {
+        $quote->update(['status' => 'rejected']);
+        return back()->with('success', "Quote {$quote->reference_number} has been rejected.");
     }
 
     public function leads()
@@ -105,11 +174,13 @@ class AdminController extends Controller
     public function rates()
     {
         $rates = Rate::with(['origin', 'country', 'region', 'tiers', 'shippingService', 'serviceType'])
+            ->orderBy('origin_id')
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->get()
+            ->groupBy('origin_id');
             
-        $warehouses = Warehouse::all();
-        $countries = Country::with('regions')->get();
+        $warehouses = Warehouse::where('type', 'origin')->get();
+        $countries = Country::with('regions')->orderBy('name')->get();
         $regions = Region::all();
         $shippingServices = ShippingService::all();
         $serviceTypes = ServiceType::all();
@@ -256,11 +327,15 @@ class AdminController extends Controller
 
     public function warehouses()
     {
-        $warehouses = Warehouse::withCount('rates')
+        $warehouses = Warehouse::with(['rates', 'countries'])
+            ->withCount('rates')
+            ->orderBy('type', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        return view('admin.warehouses', compact('warehouses'));
+        $countries = Country::orderBy('name')->get();
+
+        return view('admin.warehouses', compact('warehouses', 'countries'));
     }
 
     public function storeWarehouse(Request $request)
@@ -269,6 +344,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:10|unique:warehouses',
             'address' => 'required|string',
+            'type' => 'required|string|in:origin,destination',
         ]);
 
         Warehouse::create($request->all());
@@ -282,11 +358,34 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:10|unique:warehouses,code,' . $warehouse->id,
             'address' => 'required|string',
+            'type' => 'required|string|in:origin,destination',
         ]);
 
         $warehouse->update($request->all());
 
         return back()->with('success', 'Warehouse updated successfully.');
+    }
+
+    public function storePoeMapping(Request $request)
+    {
+        $request->validate([
+            'warehouse_id' => 'required|exists:warehouses,id',
+            'country_id' => 'required|exists:countries,id',
+        ]);
+
+        \App\Models\PoeMapping::updateOrCreate([
+            'country_id' => $request->country_id,
+        ], [
+            'warehouse_id' => $request->warehouse_id,
+        ]);
+
+        return back()->with('success', 'Country mapped to POE successfully.');
+    }
+
+    public function destroyPoeMapping(\App\Models\PoeMapping $mapping)
+    {
+        $mapping->delete();
+        return back()->with('success', 'Mapping removed successfully.');
     }
 
     public function destroyWarehouse(Warehouse $warehouse)

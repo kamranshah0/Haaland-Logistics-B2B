@@ -115,6 +115,7 @@ class QuoteController extends Controller
             'origin_id' => $request->origin_id,
             'country_id' => $request->country_id,
             'region_id' => $request->region_id,
+            'destination_warehouse_id' => $calculation['destination_warehouse_id'],
             'volume_cbm' => $this->logistics->cftToCbm($cft),
             'volume_cft' => $cft,
             'billable_volume_cft' => $calculation['billable_cft'],

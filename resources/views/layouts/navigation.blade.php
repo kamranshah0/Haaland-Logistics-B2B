@@ -4,9 +4,15 @@
         <div class="flex justify-between h-20">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center gap-3">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        <img src="{{ asset('assets/logo.png') }}" alt="Haaland Logistics" class="h-8 w-auto">
+                <div class="shrink-0 flex items-center">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 no-underline group">
+                        <div class="w-10 h-10 bg-brand-900 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg border-b-4 border-brand-600 group-hover:scale-105 transition-transform">
+                            H
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-white font-black text-xl tracking-tighter leading-none group-hover:text-brand-400 transition-colors">HAALAND</span>
+                            <span class="text-brand-600 font-bold text-[10px] tracking-[0.3em] leading-none mt-1">LOGISTICS</span>
+                        </div>
                     </a>
                 </div>
 
@@ -20,6 +26,9 @@
                         <!-- Admin Specific Links -->
                         <x-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users')" class="text-slate-300 hover:text-white transition-colors">
                             {{ __('Clients') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.quotes.index')" :active="request()->routeIs('admin.quotes.index')" class="text-slate-300 hover:text-white transition-colors">
+                            {{ __('Quotes') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.rates')" :active="request()->routeIs('admin.rates')" class="text-slate-300 hover:text-white transition-colors">
                             {{ __('Rates') }}

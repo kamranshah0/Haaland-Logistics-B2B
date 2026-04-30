@@ -97,6 +97,10 @@ class LogisticsService
         $originHandlingUsd = $cft * $originFeePerCft;
         $totalPriceUsd = $oceanFreightUsd + $originHandlingUsd;
 
+        // Find Destination POE
+        $poeMapping = \App\Models\PoeMapping::where('country_id', $countryId)->first();
+        $destinationWarehouseId = $poeMapping ? $poeMapping->warehouse_id : null;
+
         return [
             'success' => true,
             'rate_per_cbm_eur' => $tier->price_per_cft,
@@ -106,7 +110,8 @@ class LogisticsService
             'ocean_freight_usd' => round($oceanFreightUsd, 2),
             'origin_handling_usd' => round($originHandlingUsd, 2),
             'total_price' => round($totalPriceUsd, 2),
-            'applied_min' => $cft < $minVol
+            'applied_min' => $cft < $minVol,
+            'destination_warehouse_id' => $destinationWarehouseId
         ];
     }
 }
