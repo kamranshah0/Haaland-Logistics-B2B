@@ -40,12 +40,17 @@ class AdminController extends Controller
         }
 
         // Sorting
-        $sort = $request->get('sort', 'created_at');
-        $direction = $request->get('direction', 'desc');
+        $sort = $request->get('sort', 'company_name'); // Default to company_name for grouping
+        $direction = $request->get('direction', 'asc');
         
         $allowedSorts = ['name', 'company_name', 'created_at', 'status'];
         if (in_array($sort, $allowedSorts)) {
             $query->orderBy($sort, $direction);
+        }
+        
+        // Secondary sort to ensure consistency
+        if ($sort !== 'name') {
+            $query->orderBy('name', 'asc');
         }
 
         $users = $query->paginate(15)->withQueryString();

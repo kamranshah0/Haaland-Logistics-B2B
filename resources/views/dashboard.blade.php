@@ -240,8 +240,8 @@
                 
                 <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm border-t-4 border-t-[#1A5161]">
                     <div class="flex items-center gap-4">
-                        <div class="bg-[#1A5161] p-3 rounded-xl shadow-inner">
-                            <img src="{{ asset('assets/logo.png') }}" alt="Haaland Logistics" class="h-10 w-auto object-contain">
+                        <div class="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
+                            <img src="{{ asset('assets/logo-new.png') }}" alt="Haaland Logistics" class="h-10 w-auto object-contain">
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-[#1A5161] font-outfit uppercase tracking-tight">GRP Platform for Household Goods</h2>

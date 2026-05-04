@@ -4,16 +4,10 @@
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
            class="fixed inset-y-0 left-0 z-50 w-72 h-full transition-transform transform lg:translate-x-0 lg:static lg:inset-0 bg-brand-900 flex flex-col flex-shrink-0 shadow-2xl lg:shadow-none">
         
-        <!-- Sidebar Branding -->
-        <div class="h-24 flex items-center px-8 border-b border-white/5 bg-slate-950">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 no-underline group">
-                <div class="w-10 h-10 bg-brand-900 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg border-b-4 border-brand-600 group-hover:scale-105 transition-transform">
-                    H
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-white font-black text-xl tracking-tighter leading-none group-hover:text-brand-400 transition-colors">HAALAND</span>
-                    <span class="text-brand-600 font-bold text-[10px] tracking-[0.3em] leading-none mt-1">LOGISTICS</span>
-                </div>
+        <!-- Sidebar Branding (White background for logo) -->
+        <div class="h-24 flex items-center px-8 border-b border-white/5 bg-white">
+            <a href="{{ route('dashboard') }}" class="flex items-center no-underline group">
+                <x-application-logo class="h-12 w-auto" />
             </a>
         </div>
 

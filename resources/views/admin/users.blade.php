@@ -82,11 +82,23 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 italic">
+                        @php $currentCompany = null; @endphp
                         @foreach($users as $user)
+                            @if($user->company_name !== $currentCompany)
+                                @php $currentCompany = $user->company_name; @endphp
+                                <tr class="bg-slate-50/80 border-l-4 border-brand-700">
+                                    <td colspan="5" class="px-6 py-3">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-brand-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5m-4 0h4"/></svg>
+                                            <span class="text-xs font-black text-brand-900 uppercase tracking-widest">{{ $currentCompany ?? 'Individual Clients' }}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
                             <tr class="hover:bg-slate-50 transition-colors group">
                                 <td class="px-6 py-5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-brand-700/10 border border-brand-700/20 flex items-center justify-center font-bold text-brand-700 shadow-sm">
+                                    <div class="flex items-center gap-3 pl-4">
+                                        <div class="w-10 h-10 rounded-full bg-brand-700/10 border border-brand-700/20 flex items-center justify-center font-bold text-brand-700 shadow-sm group-hover:scale-110 transition-transform">
                                             {{ substr($user->name, 0, 1) }}
                                         </div>
                                         <div>
