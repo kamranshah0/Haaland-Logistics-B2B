@@ -112,7 +112,7 @@
                         </div>
 
                         <div class="p-4 bg-brand-50 border border-brand-100 rounded-2xl text-center mb-6">
-                            <p class="text-[10px] uppercase tracking-widest text-brand-700 font-bold mb-1">Estimated Total</p>
+                            <p class="text-[10px] uppercase tracking-widest text-brand-700 font-bold mb-1" x-text="actualCft < minVol && volume > 0 ? 'Minimum Charge' : 'Estimated Total'">Estimated Total</p>
                             <p class="text-3xl font-bold text-slate-900 font-outfit" x-text="estimatedTotal ? '$' + estimatedTotal : '$---'">$---</p>
                             <p class="text-[10px] text-slate-500 mt-2 italic" x-text="loading ? 'Updating rate...' : 'Calculated at current market rates'"></p>
                         </div>

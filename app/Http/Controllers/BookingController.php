@@ -54,7 +54,17 @@ class BookingController extends Controller
         // Just update status to requested
         $quote->update(['status' => 'requested']);
 
-        // Notify Admin (Logic can be added later)
+        // Notify Admins
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\SystemNotification([
+                'title' => 'New Booking Request',
+                'message' => "Client " . Auth::user()->name . " has requested a booking for Quote #{$quote->reference_number}",
+                'type' => 'success',
+                'link' => route('admin.quotes.show', $quote),
+                'icon' => 'shopping-cart'
+            ]));
+        }
 
         return redirect()->route('quotes.index')->with('success', 'Booking request sent successfully. Our team will review it and assign a vessel shortly.');
     }

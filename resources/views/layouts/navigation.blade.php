@@ -78,7 +78,7 @@
                     }
                 },
                 playNotificationSound() {
-                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    const audio = new Audio('https://notificationsounds.com/storage/sounds/file-sounds-1150-pristine.mp3');
                     audio.play().catch(e => console.log('Audio play failed:', e));
                 },
                 fetchNotifications() {
@@ -90,7 +90,7 @@
                             this.unreadCount = data.unread_count;
                             
                             // Show toast and play sound if new notification arrived
-                            if (this.unreadCount > oldUnread && oldUnread !== 0) {
+                            if (this.unreadCount > oldUnread) {
                                 this.playNotificationSound();
                                 window.dispatchEvent(new CustomEvent('toast', { 
                                     detail: { message: 'New notification received!', type: 'info' }

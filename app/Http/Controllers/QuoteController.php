@@ -127,6 +127,18 @@ class QuoteController extends Controller
             'status' => 'active'
         ]);
 
+        // Notify Admins
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\SystemNotification([
+                'title' => 'New Quote Inquiry',
+                'message' => "New quote received from " . Auth::user()->name . " (Ref: {$quote->reference_number})",
+                'type' => 'info',
+                'link' => route('admin.quotes.show', $quote),
+                'icon' => 'document-text'
+            ]));
+        }
+
         // Send Quote Email
         try {
             Mail::to(Auth::user()->email)->send(new QuoteSummary($quote));

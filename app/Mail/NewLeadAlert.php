@@ -24,6 +24,7 @@ class NewLeadAlert extends Mailable
     {
         return new Envelope(
             subject: 'New Hot Lead: Quote Inquiry from ' . $this->lead->email,
+            cc: [config('mail.from.address')],
         );
     }
 
